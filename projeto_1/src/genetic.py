@@ -3,16 +3,17 @@ from random import random, randint
 import numpy as np
 
 class AG:
-    def __init__(self, fitness: Callable[..., Any] = None):
+    def __init__(self, metadata = {}, fitness: Callable[..., Any] = None):
         self.fitness = fitness
         self.fitness_historic = np.array([])
         self.population = np.array([])
+        self.metadata = metadata
 
     @staticmethod
-    def create(num_individual: int, num_chromosome: int, fitness: Callable[..., Any] = None) -> None:
-        this = AG(fitness)
+    def create(num_individual: int, num_chromosome: int, metadata = {}, fitness: Callable[..., Any] = None) -> None:
+        this = AG(metadata, fitness)
         this.set_population(
-            AG.generate_random_population(num_individual, num_chromosome))
+            this.generate_random_population(num_individual, num_chromosome))
         
         return this
 
@@ -20,8 +21,10 @@ class AG:
     def generate_random_chromosome(length: int) -> List[int]:
         return np.random.randint(2, size=length)
 
-    @staticmethod
-    def generate_random_population(num_individual: int, num_chromosome: int) -> List[List[int]]:
+    def generate_random_population(self, num_individual: int, num_chromosome: int) -> List[List[int]]:
+        self.num_individual = num_individual
+        self.num_chromosome = num_chromosome
+        
         return [ AG.generate_random_chromosome(num_chromosome) for _ in range(num_individual) ]
 
     def set_population(self, population: List[List[int]]) -> None:
@@ -30,8 +33,8 @@ class AG:
     def set_fitness(self, fitness: Callable[..., Any] = None) -> None:
         self.fitness = fitness
 
-    def get_fitness(self, chromosome, metadata = {}) -> Union[int, float]:
-        return self.fitness(chromosome, metadata)
+    def get_fitness(self, chromosome) -> Union[int, float]:
+        return self.fitness(chromosome, self.metadata)
 
     def mutate(self, chromosome: List[int], mutate = .5) -> List[int]:
         if mutate <= random():
@@ -61,6 +64,9 @@ class AG:
                     if roulette[-1] >= sorted_value:
                         return idx
 
+        if not bool(parents):
+            return [], []
+        
         individuals, fitness_list = list(zip(*parents))
         
         idx_father = parentDrawer(fitness_list)
@@ -82,13 +88,13 @@ class AG:
         return np.array(childrens)
     
     
-    def is_valid_chromosome(self, chromosome, metadata = {}):
-        return self.get_fitness(chromosome, metadata) >= 0
+    def is_valid_chromosome(self, chromosome):
+        return self.get_fitness(chromosome) >= 0
     
-    def get_valid_chromosomes(self, metadata):
+    def get_valid_chromosomes(self):
         individuals = []
         for chromosome in self.population:
-            fitness = self.get_fitness(chromosome, metadata)
+            fitness = self.get_fitness(chromosome)
             
             if fitness >= 0:
                 individuals.append([chromosome, fitness])
@@ -99,31 +105,40 @@ class AG:
     def valid_chromosome_compar(individual):
         return individual[1]
 
-    def evolve(self, metadata = {}, reproduce_meth = 'roulette', mutate = .5):
-        parents = sorted(self.get_valid_chromosomes(metadata), key=AG.valid_chromosome_compar, reverse=True)
+    def evolve(self, reproduce_meth = 'roulette', mutate = .5):
+        parents = sorted(self.get_valid_chromosomes(), key=AG.valid_chromosome_compar, reverse=True)
+        
+        while len(parents) < 2:
+            print('Generating new population')
+            self.set_population(
+                self.generate_random_population(self.num_individual, self.num_chromosome))
+            parents = sorted(self.get_valid_chromosomes(), key=AG.valid_chromosome_compar, reverse=True)
         
         childrens = self.reproduce(parents, reproduce_meth)
+        
         return self.mutate_individuals(childrens, mutate)
     
-    def average_chromosome_fitness(self, metadata):
-        return sum(value for _, value in self.get_valid_chromosomes(metadata)) / len(self.population)
+    def average_chromosome_fitness(self):
+        if not bool(self.population):
+            return 0
+        return sum(value for _, value in self.get_valid_chromosomes()) / len(self.population)
     
-    def generation_loop(self, num_gens, metadata = {}, reproduce_meth = 'roulette', mutate = .5, log = False):
-        average_fitness = self.average_chromosome_fitness(metadata)
+    def generation_loop(self, num_gens, reproduce_meth = 'roulette', mutate = .5, log = False):
+        average_fitness = self.average_chromosome_fitness()
         self.fitness_historic = [average_fitness]
         
         if log:
             print(f'Gen 0: {average_fitness}')
-            print(f'Population: {self.population}')
+            # print(f'Population: {self.population}')
         
         for i in range(num_gens):
-            population = self.evolve(metadata, reproduce_meth, mutate)
+            population = self.evolve(reproduce_meth, mutate)
             
             if log:
                 print(f'Gen {i}: {average_fitness}')
-                print(f'Population: {population}')
+                # print(f'Population: {population}')
                 
             self.set_population(population)
-            self.fitness_historic.append(self.average_chromosome_fitness(metadata))
+            self.fitness_historic.append(self.average_chromosome_fitness())
             
         return self.fitness_historic
