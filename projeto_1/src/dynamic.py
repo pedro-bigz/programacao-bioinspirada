@@ -53,3 +53,9 @@ def rate_dynamic_programming(input_file_path):
     print(f"Execution time: {execution_time} seconds")
     
     return result
+
+
+if __name__ == '__main__':
+    for i in range(1, 17):
+        print(i)
+        rate_dynamic_programming(f'./inputs/input{i}.in')

@@ -1,7 +1,20 @@
-Instancia ./inputs/input1.in : 0
-Instancia ./inputs/input1.in : 0
 Instancia ./inputs/input1.in : 23125
-Instancia ./inputs/input1.in : 23125
-Instancia ./inputs/input1.in : 23125
-Instancia ./inputs/input1.in : 23125
-Instancia ./inputs/input1.in : 23125
+Instancia ./inputs/input2.in : 43320
+Instancia ./inputs/input3.in : 100988
+Instancia ./inputs/input5.in : 11445
+Instancia ./inputs/input6.in : 141949
+Instancia ./inputs/input6.in : 143288
+Instancia ./inputs/input6.in : 159268, 49974
+Instancia ./inputs/input7.in : 1234, 1001
+Instancia ./inputs/input1.in : 17252, 6903
+Instancia ./inputs/input2.in : 25700, 9934
+Instancia ./inputs/input3.in : 53415, 19953
+Instancia ./inputs/input4.in : 25402, 19589
+Instancia ./inputs/input5.in : 11602, 9985
+Instancia ./inputs/input6.in : 164126, 49962
+Instancia ./inputs/input7.in : 1162, 992
+Instancia ./inputs/input8.in : 488, 498
+Instancia ./inputs/input9.in : 9972, 9999
+Instancia ./inputs/input10.in : 19984, 19994
+Instancia ./inputs/input11.in : 29970, 29970
+Instancia ./inputs/input12.in : 0, 0
